@@ -1,0 +1,357 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Priority Exercise — Priority Bands (Interactive)</title>
+  <style>
+    :root{
+      /* Keep the original dark palette */
+      --bg:#0b1020;
+      --card:#101a33;
+      --text:#f2f5ff;
+      --muted:#b7c4e3;
+      --line:#263455;
+      --shadow: 0 16px 40px rgba(0,0,0,.45);
+
+      --high:#fb7185;
+      --med:#fbbf24;
+      --low:#34d399;
+
+      --focus: 0 0 0 3px rgba(96,165,250,.45);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(96,165,250,.18), transparent 50%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(34,211,238,.12), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+
+    main{max-width: 1200px; margin: 0 auto; padding: 18px 16px 28px;}
+
+    .top{
+      display:grid;
+      grid-template-columns: repeat(3, minmax(0, 1fr));
+      gap: 12px;
+      align-items: start;
+    }
+
+    .bottom{margin-top: 12px;}
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+      min-height: 100%;
+    }
+
+    .hd{
+      display:flex;
+      gap:10px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .title{
+      margin:0;
+      font-size: 16px;
+      letter-spacing: -0.01em;
+      font-weight: 800;
+    }
+
+    .pill{
+      display:inline-flex;
+      align-items:center;
+      gap:8px;
+      font-weight: 750;
+      letter-spacing: .01em;
+      padding: 6px 10px;
+      border-radius: 999px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,51,.72);
+      color: var(--text);
+      font-size: 12px;
+      white-space: nowrap;
+    }
+
+    .dot{width:10px;height:10px;border-radius:999px;display:inline-block}
+
+    .bd{padding: 12px;}
+
+    .controls{
+      display:flex;
+      gap:8px;
+      flex-wrap:wrap;
+      align-items:center;
+    }
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(183,196,227,.30);
+      color: var(--text);
+      background: rgba(183,196,227,.08);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 14px;
+    }
+    button:hover{background: rgba(183,196,227,.12)}
+    button:active{transform: translateY(1px)}
+    button:focus-visible{outline:none; box-shadow: var(--focus);}
+
+    ul{
+      margin:0;
+      padding:0;
+      list-style:none;
+      display:flex;
+      flex-direction:column;
+      gap:10px;
+      min-height: 60px;
+    }
+
+    .dropzone{
+      border: 1px dashed rgba(183,196,227,.28);
+      background: rgba(16,26,51,.40);
+      border-radius: 12px;
+      padding: 10px;
+    }
+
+    .dropzone.over{
+      outline: 3px dashed rgba(96,165,250,.45);
+      background: rgba(96,165,250,.08);
+    }
+
+    .item{
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,51,.72);
+      line-height: 1.45;
+      color: var(--text);
+      font-weight: 650;
+    }
+
+    .item[draggable="true"]{cursor: grab}
+    .item.dragging{opacity:.7; outline: 3px dashed rgba(96,165,250,.45)}
+
+    .sr{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0
+    }
+
+    .msg{
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,51,.72);
+      color: var(--muted);
+      font-size: 14px;
+      display:none;
+    }
+
+    @media (max-width: 980px){
+      .top{grid-template-columns: 1fr;}
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{scroll-behavior:auto !important; transition:none !important; animation:none !important}
+      button:active{transform:none}
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <div class="top" aria-label="Priority bands">
+      <section class="card" aria-label="High priority">
+        <div class="hd">
+          <h2 class="title">High priority</h2>
+          <span class="pill"><span class="dot" style="background:var(--high)"></span> High</span>
+        </div>
+        <div class="bd">
+          <div class="dropzone" data-zone="high" aria-label="High priority drop zone">
+            <ul id="high" aria-label="High priority tasks"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Medium priority">
+        <div class="hd">
+          <h2 class="title">Medium priority</h2>
+          <span class="pill"><span class="dot" style="background:var(--med)"></span> Medium</span>
+        </div>
+        <div class="bd">
+          <div class="dropzone" data-zone="medium" aria-label="Medium priority drop zone">
+            <ul id="medium" aria-label="Medium priority tasks"></ul>
+          </div>
+        </div>
+      </section>
+
+      <section class="card" aria-label="Low priority">
+        <div class="hd">
+          <h2 class="title">Low priority</h2>
+          <span class="pill"><span class="dot" style="background:var(--low)"></span> Low</span>
+        </div>
+        <div class="bd">
+          <div class="dropzone" data-zone="low" aria-label="Low priority drop zone">
+            <ul id="low" aria-label="Low priority tasks"></ul>
+          </div>
+        </div>
+      </section>
+    </div>
+
+    <section class="card bottom" aria-label="Unsorted tasks">
+      <div class="hd">
+        <h2 class="title">Tasks</h2>
+        <div class="controls" aria-label="Controls">
+          <button id="btnReset" type="button">Reset</button>
+        </div>
+      </div>
+      <div class="bd">
+        <div class="dropzone" data-zone="unsorted" aria-label="Unsorted tasks drop zone">
+          <ul id="unsorted" aria-label="Unsorted tasks"></ul>
+        </div>
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+        <p class="sr" id="kbdHelp">Keyboard: focus a task then press 1 (High), 2 (Medium), 3 (Low), or 0 (Unsorted).</p>
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const TASKS = [
+      "A caller says they are the Chancellor of the University and is locked out of their account before an urgent meeting.",
+      "The Wi-Fi network in the Students’ Union appears to be down, with multiple students reporting that they cannot get online.",
+      "A user is unable to open a Word document they have been working on and is concerned the file may be corrupted.",
+      "A research team has requested access to a new AI model to support work planned for the start of the next academic year.",
+      "The Finance and Administration team would like a new app built to manage expense approvals and replace their current manual process.",
+      "A faculty has an upcoming inspection and would like an AI agent to help organise, search and summarise their documentation.",
+      "The Communications team has created a video about the University’s new AI tool and needs the content fact-checked before it is published on social media.",
+      "A user cannot create new chats in Teams, and several other people in their team are reporting the same issue.",
+      "A user has lost access to several important Teams group chats and can no longer access information they need for their work."
+    ];
+
+    const els = {
+      high: document.getElementById('high'),
+      medium: document.getElementById('medium'),
+      low: document.getElementById('low'),
+      unsorted: document.getElementById('unsorted'),
+      msg: document.getElementById('msg'),
+      btnReset: document.getElementById('btnReset'),
+    };
+
+    const ZONES = ["high","medium","low","unsorted"];
+
+    function uid(){
+      return 't_' + Math.random().toString(16).slice(2) + '_' + Date.now().toString(16);
+    }
+
+    function showMsg(text){
+      els.msg.textContent = text;
+      els.msg.style.display = 'block';
+      window.clearTimeout(showMsg._t);
+      showMsg._t = window.setTimeout(() => els.msg.style.display = 'none', 2200);
+    }
+
+    function makeItem(text){
+      const li = document.createElement('li');
+      li.className = 'item';
+      li.draggable = true;
+      li.tabIndex = 0;
+      li.setAttribute('role', 'listitem');
+      li.setAttribute('aria-describedby', 'kbdHelp');
+      li.dataset.id = uid();
+      li.textContent = text;
+
+      li.addEventListener('dragstart', (e) => {
+        li.classList.add('dragging');
+        e.dataTransfer.effectAllowed = 'move';
+        e.dataTransfer.setData('text/plain', li.dataset.id);
+      });
+
+      li.addEventListener('dragend', () => {
+        li.classList.remove('dragging');
+      });
+
+      li.addEventListener('keydown', (e) => {
+        const key = e.key;
+        if (!["1","2","3","0"].includes(key)) return;
+        e.preventDefault();
+        const targetZone = key === "1" ? "high" : key === "2" ? "medium" : key === "3" ? "low" : "unsorted";
+        els[targetZone].appendChild(li);
+        showMsg(`Moved to ${targetZone}.`);
+      });
+
+      return li;
+    }
+
+    function renderInitial(){
+      // Clear zones
+      for (const z of ZONES) els[z].innerHTML = '';
+      // Put all tasks into unsorted, in original order
+      for (const t of TASKS) els.unsorted.appendChild(makeItem(t));
+    }
+
+    function findItemById(id){
+      return document.querySelector(`.item[data-id="${CSS.escape(id)}"]`);
+    }
+
+    function setupDropzones(){
+      document.querySelectorAll('.dropzone').forEach(zoneEl => {
+        zoneEl.addEventListener('dragover', (e) => {
+          e.preventDefault();
+          zoneEl.classList.add('over');
+          e.dataTransfer.dropEffect = 'move';
+        });
+
+        zoneEl.addEventListener('dragleave', () => {
+          zoneEl.classList.remove('over');
+        });
+
+        zoneEl.addEventListener('drop', (e) => {
+          e.preventDefault();
+          zoneEl.classList.remove('over');
+
+          const id = e.dataTransfer.getData('text/plain');
+          const item = findItemById(id);
+          if (!item) return;
+
+          const list = zoneEl.querySelector('ul');
+          if (!list) return;
+          list.appendChild(item);
+        });
+      });
+    }
+
+    function listTexts(ul){
+      return Array.from(ul.querySelectorAll('.item')).map(li => li.textContent.trim());
+    }
+
+
+    els.btnReset.addEventListener('click', () => {
+      renderInitial();
+      showMsg('Reset.');
+    });
+
+    renderInitial();
+    setupDropzones();
+  </script>
+</body>
+</html>
