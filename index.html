@@ -189,7 +189,7 @@
         <div class="controls" aria-label="Controls">
           <button id="btnShuffle" class="secondary" type="button">Shuffle</button>
           <button id="btnReset" class="secondary" type="button">Reset</button>
-          <button id="btnExport" class="secondary" type="button">Export</button>
+
         </div>
       </div>
 
@@ -220,7 +220,6 @@
     const msgEl = document.getElementById('msg');
     const btnShuffle = document.getElementById('btnShuffle');
     const btnReset = document.getElementById('btnReset');
-    const btnExport = document.getElementById('btnExport');
 
     const INITIAL = DEFAULT_TASKS.map(t => ({...t}));
     let tasks = DEFAULT_TASKS.map(t => ({...t}));
@@ -257,26 +256,6 @@
       showMsg('Reset to default order.');
     }
 
-    function exportJson(){
-      const payload = {
-        exportedAt: new Date().toISOString(),
-        tasks: tasks.map((t, index) => ({
-          rank: index + 1,
-          id: t.id,
-          text: t.text
-        }))
-      };
-
-      const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
-      const a = document.createElement('a');
-      a.href = URL.createObjectURL(blob);
-      a.download = 'priority-ordering.json';
-      document.body.appendChild(a);
-      a.click();
-      URL.revokeObjectURL(a.href);
-      a.remove();
-      showMsg('Exported JSON.');
-    }
 
     function render(){
       listEl.innerHTML = '';
@@ -366,7 +345,6 @@
 
     btnShuffle.addEventListener('click', shuffle);
     btnReset.addEventListener('click', reset);
-    btnExport.addEventListener('click', exportJson);
 
     render();
   </script>
