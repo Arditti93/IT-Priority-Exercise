@@ -1,1 +1,374 @@
-<h1>Hello World</h1>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Priority Exercise — IT / Power Platform Tasks</title>
+  <style>
+    :root{
+      /* Dark, accessible palette */
+      --bg:#0b1020;
+      --card:#101a33;
+      --text:#f2f5ff;
+      --muted:#b7c4e3;
+      --line:#263455;
+      --accent:#60a5fa;
+      --accent2:#22d3ee;
+      --shadow: 0 16px 40px rgba(0,0,0,.45);
+      --focus: 0 0 0 3px rgba(96,165,250,.45);
+    }
+
+    *{box-sizing:border-box}
+
+    body{
+      margin:0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Helvetica, Arial, sans-serif;
+      background: radial-gradient(1200px 800px at 20% -10%, rgba(96,165,250,.18), transparent 50%),
+                  radial-gradient(900px 600px at 90% 10%, rgba(34,211,238,.12), transparent 55%),
+                  var(--bg);
+      color: var(--text);
+    }
+
+    header, main{max-width: 980px; margin: 0 auto; padding: 18px 16px;}
+
+    h1{margin: 0 0 6px; font-size: clamp(20px, 2.8vw, 30px); letter-spacing: -0.01em;}
+    p{margin:0; line-height:1.55; color: var(--muted);}
+
+    .card{
+      background: linear-gradient(180deg, rgba(255,255,255,.04), rgba(255,255,255,.02));
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      box-shadow: var(--shadow);
+      overflow: hidden;
+      backdrop-filter: blur(6px);
+    }
+
+    .card .hd{
+      display:flex;
+      gap:12px;
+      align-items:center;
+      justify-content:space-between;
+      padding: 12px 12px;
+      border-bottom: 1px solid var(--line);
+    }
+
+    .card .bd{padding: 12px;}
+
+    .controls{display:flex; flex-wrap:wrap; gap:8px; align-items:center}
+
+    button{
+      appearance:none;
+      border: 1px solid rgba(96,165,250,.45);
+      color: var(--text);
+      background: rgba(96,165,250,.12);
+      padding: 9px 12px;
+      border-radius: 10px;
+      cursor: pointer;
+      font-weight: 650;
+      font-size: 14px;
+    }
+    button.secondary{
+      border-color: rgba(183,196,227,.30);
+      background: rgba(183,196,227,.08);
+    }
+    button:hover{background: rgba(96,165,250,.18)}
+    button.secondary:hover{background: rgba(183,196,227,.12)}
+    button:active{transform: translateY(1px)}
+
+    button:focus-visible{
+      outline: none;
+      box-shadow: var(--focus);
+    }
+
+    .hint{
+      border: 1px solid var(--line);
+      border-left: 4px solid var(--accent);
+      border-radius: 12px;
+      padding: 10px 12px;
+      color: var(--muted);
+      font-size: 14px;
+      background: rgba(34,211,238,.06);
+      margin-bottom: 12px;
+    }
+
+    ul{margin:0; padding:0; list-style:none; display:flex; flex-direction:column; gap:10px}
+
+    .item{
+      display:grid;
+      grid-template-columns: 1fr auto;
+      gap: 10px;
+      align-items: start;
+      padding: 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,51,.72);
+    }
+
+    .item[draggable="true"]{cursor: grab}
+    .item.dragging{opacity: .7; outline: 3px dashed rgba(96,165,250,.45)}
+
+    .taskText{
+      margin: 0;
+      color: var(--text);
+      font-weight: 650;
+      line-height: 1.45;
+    }
+
+    .actions{display:flex; gap:6px}
+
+    .iconBtn{
+      width: 40px;
+      height: 40px;
+      border-radius: 10px;
+      padding: 0;
+      display: grid;
+      place-items: center;
+      border: 1px solid rgba(183,196,227,.30);
+      background: rgba(183,196,227,.08);
+      color: var(--text);
+      font-weight: 900;
+    }
+    .iconBtn:hover{background: rgba(183,196,227,.12)}
+
+    .msg{
+      display:none;
+      margin-top: 10px;
+      padding: 10px 12px;
+      border-radius: 12px;
+      border: 1px solid var(--line);
+      background: rgba(16,26,51,.72);
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .small{
+      margin-top: 10px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+    }
+
+    .kbd{
+      font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+      border: 1px solid var(--line);
+      background: rgba(183,196,227,.08);
+      padding: 2px 6px;
+      border-radius: 6px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    .sr{
+      position:absolute;
+      width:1px;
+      height:1px;
+      padding:0;
+      margin:-1px;
+      overflow:hidden;
+      clip:rect(0,0,0,0);
+      white-space:nowrap;
+      border:0
+    }
+
+    @media (prefers-reduced-motion: reduce){
+      *{scroll-behavior:auto !important; transition:none !important; animation:none !important}
+      button:active{transform:none}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Priority Exercise: IT incidents and requests</h1>
+    <p>Reorder the incidents from <strong>highest priority (top)</strong> to lowest (bottom). Drag-and-drop, or use the <span class="kbd">↑</span>/<span class="kbd">↓</span> buttons.</p>
+  </header>
+
+  <main>
+    <section class="card" aria-label="Priority ordering exercise">
+      <div class="hd">
+        <strong>Task list</strong>
+        <div class="controls" aria-label="Controls">
+          <button id="btnShuffle" class="secondary" type="button">Shuffle</button>
+          <button id="btnReset" class="secondary" type="button">Reset</button>
+          <button id="btnExport" class="secondary" type="button">Export</button>
+        </div>
+      </div>
+
+      <div class="bd">
+
+        <ul id="list" aria-label="Reorderable list"></ul>
+
+        <div id="msg" class="msg" role="status" aria-live="polite"></div>
+
+      </div>
+    </section>
+  </main>
+
+  <script>
+    const DEFAULT_TASKS = [
+      { id: "chancellor-lockout", text: "A caller says they are the Chancellor of the University and is locked out of their account before an urgent meeting." },
+      { id: "wifi-su-down", text: "The Wi-Fi network in the Students’ Union appears to be down, with multiple students reporting that they cannot get online." },
+      { id: "word-corrupt", text: "A user is unable to open a Word document they have been working on and is concerned the file may be corrupted." },
+      { id: "ai-model-next-year", text: "A research team has requested access to a new AI model to support work planned for the start of the next academic year." },
+      { id: "expense-approvals-app", text: "The Finance and Administration team would like a new app built to manage expense approvals and replace their current manual process." },
+      { id: "inspection-ai-agent", text: "A faculty has an upcoming inspection and would like an AI agent to help organise, search and summarise their documentation." },
+      { id: "comms-video-factcheck", text: "The Communications team has created a video about the University’s new AI tool and needs the content fact-checked before it is published on social media." },
+      { id: "teams-cannot-create-chats", text: "A user cannot create new chats in Teams, and several other people in their team are reporting the same issue." },
+      { id: "teams-lost-group-chats", text: "A user has lost access to several important Teams group chats and can no longer access information they need for their work." }
+    ];
+
+    const listEl = document.getElementById('list');
+    const msgEl = document.getElementById('msg');
+    const btnShuffle = document.getElementById('btnShuffle');
+    const btnReset = document.getElementById('btnReset');
+    const btnExport = document.getElementById('btnExport');
+
+    const INITIAL = DEFAULT_TASKS.map(t => ({...t}));
+    let tasks = DEFAULT_TASKS.map(t => ({...t}));
+
+    function showMsg(text){
+      msgEl.textContent = text;
+      msgEl.style.display = 'block';
+      window.clearTimeout(showMsg._t);
+      showMsg._t = window.setTimeout(() => msgEl.style.display = 'none', 2200);
+    }
+
+    function moveTask(id, dir){
+      const idx = tasks.findIndex(t => t.id === id);
+      if(idx < 0) return;
+      const newIdx = idx + dir;
+      if(newIdx < 0 || newIdx >= tasks.length) return;
+      const [t] = tasks.splice(idx, 1);
+      tasks.splice(newIdx, 0, t);
+      render();
+    }
+
+    function shuffle(){
+      for(let i = tasks.length - 1; i > 0; i--){
+        const j = Math.floor(Math.random() * (i + 1));
+        [tasks[i], tasks[j]] = [tasks[j], tasks[i]];
+      }
+      render();
+      showMsg('Shuffled.');
+    }
+
+    function reset(){
+      tasks = INITIAL.map(t => ({...t}));
+      render();
+      showMsg('Reset to default order.');
+    }
+
+    function exportJson(){
+      const payload = {
+        exportedAt: new Date().toISOString(),
+        tasks: tasks.map((t, index) => ({
+          rank: index + 1,
+          id: t.id,
+          text: t.text
+        }))
+      };
+
+      const blob = new Blob([JSON.stringify(payload, null, 2)], {type: 'application/json'});
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(blob);
+      a.download = 'priority-ordering.json';
+      document.body.appendChild(a);
+      a.click();
+      URL.revokeObjectURL(a.href);
+      a.remove();
+      showMsg('Exported JSON.');
+    }
+
+    function render(){
+      listEl.innerHTML = '';
+
+      tasks.forEach((t) => {
+        const li = document.createElement('li');
+        li.className = 'item';
+        li.setAttribute('draggable', 'true');
+        li.dataset.id = t.id;
+
+        const left = document.createElement('div');
+        const p = document.createElement('p');
+        p.className = 'taskText';
+        p.textContent = t.text;
+        left.appendChild(p);
+
+        const actions = document.createElement('div');
+        actions.className = 'actions';
+
+        const up = document.createElement('button');
+        up.type = 'button';
+        up.className = 'iconBtn';
+        up.setAttribute('aria-label', 'Move up');
+        up.textContent = '↑';
+        up.addEventListener('click', () => moveTask(t.id, -1));
+
+        const down = document.createElement('button');
+        down.type = 'button';
+        down.className = 'iconBtn';
+        down.setAttribute('aria-label', 'Move down');
+        down.textContent = '↓';
+        down.addEventListener('click', () => moveTask(t.id, +1));
+
+        actions.appendChild(up);
+        actions.appendChild(down);
+
+        li.appendChild(left);
+        li.appendChild(actions);
+
+        // Drag & drop
+        li.addEventListener('dragstart', (e) => {
+          li.classList.add('dragging');
+          e.dataTransfer.effectAllowed = 'move';
+          e.dataTransfer.setData('text/plain', t.id);
+        });
+
+        li.addEventListener('dragend', () => {
+          li.classList.remove('dragging');
+        });
+
+        listEl.appendChild(li);
+      });
+    }
+
+    function getDragAfterElement(container, y){
+      const els = [...container.querySelectorAll('.item:not(.dragging)')];
+      return els.reduce((closest, child) => {
+        const box = child.getBoundingClientRect();
+        const offset = y - box.top - box.height / 2;
+        if(offset < 0 && offset > closest.offset){
+          return { offset, element: child };
+        }
+        return closest;
+      }, { offset: Number.NEGATIVE_INFINITY, element: null }).element;
+    }
+
+    listEl.addEventListener('dragover', (e) => {
+      e.preventDefault();
+      const dragging = listEl.querySelector('.dragging');
+      if(!dragging) return;
+      const afterEl = getDragAfterElement(listEl, e.clientY);
+      if(afterEl == null){
+        listEl.appendChild(dragging);
+      }else{
+        listEl.insertBefore(dragging, afterEl);
+      }
+    });
+
+    listEl.addEventListener('drop', (e) => {
+      e.preventDefault();
+      // Rebuild tasks array based on current DOM order
+      const ids = [...listEl.querySelectorAll('.item')].map(el => el.dataset.id);
+      tasks = ids.map(id => tasks.find(t => t.id === id)).filter(Boolean);
+      render();
+      showMsg('Order updated.');
+    });
+
+    btnShuffle.addEventListener('click', shuffle);
+    btnReset.addEventListener('click', reset);
+    btnExport.addEventListener('click', exportJson);
+
+    render();
+  </script>
+</body>
+</html>
